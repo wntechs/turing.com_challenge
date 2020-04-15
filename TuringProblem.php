@@ -18,45 +18,47 @@ class TuringProblem
         $has_more_points = true;
         $path = [];
         $total = 0;
-        $count = 1;
         array_push($path, $this->current_point);
         do{
-           $reachableNodes = $this->getReachableNodes($this->current_point);
-           if(count($reachableNodes) > 0){
-                $effectiveNode = $this->getEffectiveNode($reachableNodes);
+            $effectiveNode = $this->getEffectiveNode();
+           if($effectiveNode != false){
+
                 array_push($path, $effectiveNode[0]);
                 $total += $effectiveNode[1];
                 $this->current_point = $effectiveNode[0];
            }else{
                $has_more_points = false;
            }
-           if($count++ > 100) break;
         }while($has_more_points);
 
        return [$total, $path];
     }
 
-    private function getEffectiveNode($reachableNodes){
+    private function getEffectiveNode(){
         $effectiveness = 0;
         $effectiveNode = false;
         $score = 0;
-        foreach($reachableNodes as $node){
-            $time = $node[2];
-            $pointValue = $this->points[$node[1]];
-            if(($pointValue/$time) > $effectiveness){
-                $effectiveness = $pointValue/$time;
-                $effectiveNode = $node[1];
-                $score = $pointValue - $time;
+        $reachableNodes = $this->getReachableNodes();
+        if(count($reachableNodes) > 0 ) {
+            foreach ($reachableNodes as $node) {
+                $time = $node[2];
+                $pointValue = $this->points[$node[1]];
+                if (($pointValue / $time) > $effectiveness) {
+                    $effectiveness = $pointValue / $time;
+                    $effectiveNode = $node[1];
+                    $score = $pointValue - $time;
+                }
             }
+            return [$effectiveNode, $score];
         }
-
-        return [$effectiveNode, $score];
+        return false;
     }
 
-    private function getReachableNodes($current_node){
+    private function getReachableNodes(){
+
         $reachableNodes = [];
         foreach($this->travel_time as $t_node){
-            if($t_node[0] == $current_node){
+            if($t_node[0] == $this->current_point){
                 $reachableNodes[] = $t_node;
             }
         }
